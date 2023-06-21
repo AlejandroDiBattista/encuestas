@@ -33,7 +33,7 @@ class _EncuestaPageState extends State<EncuestaPage> {
   void actualizar() => setState(() {});
 
   void marcarRespuesta(int respuesta) {
-    if (encuesta.actual.respuesta == respuesta) respuesta = 0;
+    // if (encuesta.actual.respuesta == respuesta) respuesta = 0;
     encuesta.responder(respuesta);
     avanzarPregunta();
   }
@@ -52,10 +52,10 @@ class _EncuestaPageState extends State<EncuestaPage> {
     actualizar();
   }
 
-  void finalizarEncuesta() {
-    encuesta.guardar();
-    Get.back();
-  }
+  // void finalizarEncuesta() {
+  //   encuesta.guardar();
+  //   Get.back();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +67,7 @@ class _EncuestaPageState extends State<EncuestaPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text('Encuesta PASO 2023'),
+          Text('${pregunta.id}'),
           Text('${encuesta.posicion + 1} de ${encuesta.length}', style: const TextStyle(fontSize: 15))
         ],
       )),
@@ -91,7 +92,7 @@ class _EncuestaPageState extends State<EncuestaPage> {
 
   Widget crearNavegacion() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
       child: Row(
         mainAxisAlignment: !encuesta.esInicial ? MainAxisAlignment.spaceBetween : MainAxisAlignment.end,
         children: [
@@ -120,44 +121,42 @@ class _EncuestaPageState extends State<EncuestaPage> {
   Widget crearRespuesta(int i) {
     final pregunta = encuesta.actual;
     final respuesta = pregunta.respuestas[i];
-    final bool seleccionado = (i + 1) == pregunta.respuesta;
+    final seleccionado = (i + 1) == pregunta.respuesta;
+
     final par = respuesta.split(".");
 
-    final texto = par[0].trim();
+    final opcion = par[0].trim();
     final info = par.length > 1 ? par[1].trim() : "";
 
-    final color = (seleccionado ? Colors.yellow : Colors.black);
-    final compacta = pregunta.opcionUnica;
+    final unica = pregunta.opcionUnica;
+    final color = (seleccionado && !unica ? Colors.yellow : Colors.black);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white.withOpacity(0.4), // Ajusta el nivel de transparencia aquí
+          backgroundColor: Colors.white.withOpacity(0.3), // Ajusta el nivel de transparencia aquí
           padding: EdgeInsets.all(16),
         ),
         onPressed: () => marcarRespuesta(i + 1),
         child: SizedBox(
-          width: compacta ? 120 : Get.width - 20,
+          width: unica ? 120 : Get.width - 20,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Spacer(),
               Column(
-                // crossAxisAlignment: compacta ? CrossAxisAlignment.center : CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    texto,
-                    style: TextStyle(fontSize: 20, color: color, fontWeight: FontWeight.bold),
-                    textAlign: compacta ? TextAlign.center : TextAlign.start,
-                  ),
+                  Text(opcion,
+                      style: TextStyle(fontSize: 20, color: color, fontWeight: FontWeight.normal),
+                      textAlign: unica ? TextAlign.center : TextAlign.start),
                   if (info.isNotEmpty)
-                    Text(info, style: TextStyle(fontSize: 16, color: color, fontWeight: FontWeight.w100)),
+                    Text(info, style: TextStyle(fontSize: 16, color: color, fontWeight: FontWeight.w100))
                 ],
               ),
               Spacer(),
-              if (estadisticas && !compacta)
+              if (estadisticas && !unica)
                 Text("${12}", style: TextStyle(fontSize: 16, color: color, fontWeight: FontWeight.w100))
             ],
           ),

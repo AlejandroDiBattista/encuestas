@@ -33,6 +33,7 @@ extension UtilesString on String {
   bool get esNumero => RegExp(r'^[+-]?[[0-9]+$').hasMatch(this);
   bool get soloLetras => RegExp(r'^[a-zñáéíóïü]+$', caseSensitive: false).hasMatch(this);
   String pad([int n = 20]) => this.padRight(n).substring(0, n);
+
   String get invertirNombre {
     if (!this.contains(",")) return this;
     final partes = this.split(",").map((e) => e.trim()).toList();
@@ -115,8 +116,8 @@ AppBar crearTitulo(Widget titulo, {List<Widget>? actions}) =>
 BoxDecoration crearFondo() => const BoxDecoration(
         gradient: LinearGradient(
       colors: [Colors.purple, Colors.blue],
-      begin: Alignment.bottomLeft,
-      end: Alignment.topRight,
+      begin: Alignment.bottomRight,
+      end: Alignment.topLeft,
     ));
 
 Widget resultado(String titulo, int valor, [bool invertido = false]) {

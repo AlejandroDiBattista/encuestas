@@ -65,22 +65,15 @@ class Pregunta {
       respuestas: ["Rojo", "Azul", "Amarillo", "Verde", "Rosa", "Celeste"],
     )
   ];
-
-  // static Future<void> cargar() async {
-  //   preguntas = await bajar();
-  // }
-
-  static void guardarRespuestas(List<int> datos) async {
-    await SheetsApi.registrarRespuestas(datos);
-  }
 }
 
 class Encuesta extends ListBase<Pregunta> {
   List<Pregunta> preguntas = [];
   int posicion = -1;
+  List<int> anteriores = [];
 
   Encuesta() {
-    posicion = -1;
+    this.posicion = 0;
   }
 
   int get length => preguntas.length;
@@ -94,22 +87,31 @@ class Encuesta extends ListBase<Pregunta> {
     posicion = 0;
   }
 
-  bool siguiente() {
-    if (esFinal) return false;
-    posicion++;
-    return true;
-  }
-
-  bool anterior() {
-    if (esInicial) return false;
-    posicion--;
-    return true;
-  }
-
   bool get esInicial => posicion == 0;
   bool get esFinal => posicion == length - 1;
 
   Pregunta get actual => preguntas[posicion];
+
+  void siguiente() {
+    if (esFinal) return;
+
+    anteriores.add(posicion);
+
+    final id = "${actual.id}.${actual.respuesta}";
+    final i = preguntas.indexWhere((p) => p.id == id);
+    if (i != -1) {
+      posicion = i;
+    } else {
+      final id = '${int.parse(actual.id.split(".").first) + 1}';
+      posicion = preguntas.indexWhere((p) => p.id == id);
+    }
+  }
+
+  void anterior() {
+    if (esInicial) return;
+    
+    posicion = anteriores.removeLast();
+  }
 
   void responder(int respuesta) {
     preguntas[posicion].respuesta = respuesta;
@@ -133,6 +135,7 @@ class Encuesta extends ListBase<Pregunta> {
         id: "0", descripcion: 'Bienvenido..La siguiente encuesta es totalmente anónima', respuestas: ["Comenzar"]));
     return salida;
   }
+
   factory Encuesta.ejemplo() {
     final salida = Encuesta();
     Pregunta.ejemplos.forEach((e) => salida.add(e));
@@ -141,6 +144,7 @@ class Encuesta extends ListBase<Pregunta> {
 
   void reiniciar() {
     preguntas.forEach((pregunta) => pregunta.respuesta = 0);
+    anteriores.clear();
     posicion = 0;
   }
 }
