@@ -27,10 +27,29 @@ dependencies:
     cupertino_icons: ^1.0.2
     gsheets: ^0.4.2
     get: ^4.6.5
+    flutter_launcher_icons: ^0.13.1
     # csv: ^5.0.2
 
 flutter_launcher_name:
-    name: 'PunteoYB'
+    name: 'Encuestas YB'
+
+flutter_launcher_icons:
+    android: "launcher_icon"
+    ios: true
+    image_path: "web/icono.png"
+    min_sdk_android: 21 # android min sdk min:16, default 21
+    web:
+        generate: true
+        image_path: "web/icono.png"
+        background_color: "#hexcode"
+        theme_color: "#hexcode"
+    windows:
+        generate: true
+        image_path: "path/to/image.png"
+        icon_size: 48 # min:48, max:256, default: 48
+    macos:
+        generate: true
+        image_path: "path/to/image.png"
 
 dev_dependencies:
     flutter_test:
