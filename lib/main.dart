@@ -23,10 +23,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           appBarTheme: AppBarTheme(color: Colores.comenzar),
           colorSchemeSeed: Colors.green,
-          // colorSchemeSeed: Colores.comenzar,
           useMaterial3: true,
         ),
-        // home: const LoginPage());
         home: const EncuestaPage());
   }
 }

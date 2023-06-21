@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import '../sheets_api.dart';
 
@@ -7,10 +8,11 @@ class Pregunta {
   String id;
   String descripcion;
   List<String> respuestas;
+  int respuesta = 0;
 
   Pregunta({required this.id, required this.descripcion, required this.respuestas});
 
-  Pregunta copyWith({String? id, String? descripcion, List<String>? respuestas}) => Pregunta(
+  Pregunta copyWith({String? id, String? descripcion, List<String>? respuestas, List<int>? cantidades}) => Pregunta(
         id: id ?? this.id,
         descripcion: descripcion ?? this.descripcion,
         respuestas: respuestas ?? this.respuestas,
@@ -37,7 +39,8 @@ class Pregunta {
   @override
   int get hashCode => id.hashCode ^ descripcion.hashCode ^ respuestas.hashCode;
 
-  static Preguntas preguntas = [];
+  bool get opcionUnica => respuestas.length == 1;
+  bool get esContestada => respuesta != 0;
 
   static Preguntas ejemplos = [
     Pregunta(
@@ -63,16 +66,81 @@ class Pregunta {
     )
   ];
 
-  static Future<void> cargar() async {
-    preguntas = await bajar();
-  }
-
-  static Future<Preguntas> bajar() async {
-    final datos = await SheetsApi.traerPreguntas();
-    return datos.map((dato) => Pregunta.fromMap(dato)).toList();
-  }
+  // static Future<void> cargar() async {
+  //   preguntas = await bajar();
+  // }
 
   static void guardarRespuestas(List<int> datos) async {
     await SheetsApi.registrarRespuestas(datos);
+  }
+}
+
+class Encuesta extends ListBase<Pregunta> {
+  List<Pregunta> preguntas = [];
+  int posicion = -1;
+
+  Encuesta() {
+    posicion = -1;
+  }
+
+  int get length => preguntas.length;
+  set length(int newLength) => preguntas.length = newLength;
+
+  Pregunta operator [](int index) => preguntas[index];
+  void operator []=(int index, Pregunta value) => preguntas[index] = value;
+
+  void add(Pregunta pregunta) {
+    preguntas.add(pregunta);
+    posicion = 0;
+  }
+
+  bool siguiente() {
+    if (esFinal) return false;
+    posicion++;
+    return true;
+  }
+
+  bool anterior() {
+    if (esInicial) return false;
+    posicion--;
+    return true;
+  }
+
+  bool get esInicial => posicion == 0;
+  bool get esFinal => posicion == length - 1;
+
+  Pregunta get actual => preguntas[posicion];
+
+  void responder(int respuesta) {
+    preguntas[posicion].respuesta = respuesta;
+  }
+
+  static Future<Encuesta> bajar() async {
+    final datos = await SheetsApi.traerPreguntas();
+
+    final salida = Encuesta();
+    datos.forEach((dato) => salida.add(Pregunta.fromMap(dato)));
+    return salida;
+  }
+
+  void guardar() async {
+    await SheetsApi.registrarRespuestas(this.map((pregunta) => pregunta.respuesta).toList());
+  }
+
+  factory Encuesta.bienvenida() {
+    final salida = Encuesta();
+    salida.add(Pregunta(
+        id: "0", descripcion: 'Bienvenido..La siguiente encuesta es totalmente anónima', respuestas: ["Comenzar"]));
+    return salida;
+  }
+  factory Encuesta.ejemplo() {
+    final salida = Encuesta();
+    Pregunta.ejemplos.forEach((e) => salida.add(e));
+    return salida;
+  }
+
+  void reiniciar() {
+    preguntas.forEach((pregunta) => pregunta.respuesta = 0);
+    posicion = 0;
   }
 }

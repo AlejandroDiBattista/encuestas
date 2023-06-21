@@ -109,24 +109,14 @@ void medir(String mensaje, Function ejecutar) {
   print('| [ ${reloj.elapsedMilliseconds}ms ]');
 }
 
-AppBar crearTitulo(Widget titulo, {List<Widget>? actions}) => AppBar(
-    title: titulo,
-    centerTitle: false,
-    flexibleSpace: Container(
-      decoration: BoxDecoration(
-          gradient: LinearGradient(
-        colors: [Colores.comenzar, Colores.terminar],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      )),
-    ),
-    actions: actions);
+AppBar crearTitulo(Widget titulo, {List<Widget>? actions}) =>
+    AppBar(title: titulo, backgroundColor: Colors.transparent, elevation: 0, actions: actions);
 
-BoxDecoration crearFondo() => BoxDecoration(
+BoxDecoration crearFondo() => const BoxDecoration(
         gradient: LinearGradient(
-      colors: [Colores.comenzar, Colores.terminar],
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
+      colors: [Colors.purple, Colors.blue],
+      begin: Alignment.bottomLeft,
+      end: Alignment.topRight,
     ));
 
 Widget resultado(String titulo, int valor, [bool invertido = false]) {
@@ -134,9 +124,7 @@ Widget resultado(String titulo, int valor, [bool invertido = false]) {
   var resultado = Text("$valor", style: TextStyle(color: Colors.blue, fontSize: 14, fontWeight: FontWeight.bold));
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 4),
-    child: Row(
-      children: invertido ? [resultado, etiqueta] : [etiqueta, resultado],
-    ),
+    child: Row(children: invertido ? [resultado, etiqueta] : [etiqueta, resultado]),
   );
 }
 

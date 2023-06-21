@@ -12,25 +12,19 @@ class EncuestaPage extends StatefulWidget {
 }
 
 class _EncuestaPageState extends State<EncuestaPage> {
-  int actual = 0;
-  List<int> respuestas = [];
+  Encuesta encuesta = Encuesta.bienvenida();
 
-  Preguntas preguntas = Pregunta.preguntas;
+  bool cargando = false;
+  bool estadisticas = false;
 
-  bool cargando = true;
   @override
   void initState() {
     super.initState();
 
-    cargando = true;
-    preguntas = Pregunta.ejemplos;
-    preguntas.forEach((element) => respuestas.add(0));
+    // cargando = true;
 
-    Pregunta.cargar().then((value) {
-      preguntas = Pregunta.preguntas;
-      print("Preguntas cargadas ${Pregunta.preguntas.length}");
-      print("$preguntas");
-      preguntas.forEach((element) => respuestas.add(0));
+    Encuesta.bajar().then((v) {
+      encuesta = v;
       cargando = false;
       actualizar();
     });
@@ -38,135 +32,134 @@ class _EncuestaPageState extends State<EncuestaPage> {
 
   void actualizar() => setState(() {});
 
-  void seleccionarRespuesta(int respuesta) {
-    respuestas[actual] = (respuestas[actual] == respuesta) ? 0 : respuesta;
-    if (respuestas[actual] > 0) {
-      avanzarPregunta();
-    }
-    actualizar();
+  void marcarRespuesta(int respuesta) {
+    if (encuesta.actual.respuesta == respuesta) respuesta = 0;
+    encuesta.responder(respuesta);
+    avanzarPregunta();
   }
 
   void retrocederPregunta() {
-    if (actual > 0) {
-      actual--;
-    }
+    encuesta.anterior();
     actualizar();
   }
 
   void avanzarPregunta() {
-    if (respuestas[actual] > 0) {
-      if (actual < preguntas.length - 1) actual++;
+    encuesta.siguiente();
+    if (encuesta.esFinal && encuesta.actual.esContestada) {
+      encuesta.guardar();
+      encuesta.reiniciar();
     }
     actualizar();
   }
 
   void finalizarEncuesta() {
-    Pregunta.guardarRespuestas(respuestas);
+    encuesta.guardar();
     Get.back();
   }
 
   @override
   Widget build(BuildContext context) {
-    final pregunta = preguntas[actual];
+    final pregunta = encuesta.actual;
     final respuestas = pregunta.respuestas;
 
     return Scaffold(
       appBar: crearTitulo(Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Encuesta'),
-          Text('${actual + 1} de ${preguntas.length}', style: const TextStyle(fontSize: 15)),
+          const Text('Encuesta PASO 2023'),
+          Text('${encuesta.posicion + 1} de ${encuesta.length}', style: const TextStyle(fontSize: 15))
         ],
       )),
+      extendBodyBehindAppBar: true,
       body: Container(
         decoration: crearFondo(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            buildDescripcion(pregunta),
+            crearDescripcion(pregunta),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: respuestas.asMap().entries.map((item) => creardRespuesta(item.value, item.key)).toList(),
+              children: respuestas.asMap().entries.map((item) => crearRespuesta(item.key)).toList(),
             ),
-            cargando ? Center(child: CircularProgressIndicator()) : buildNavegacion(),
+            cargando ? Center(child: CircularProgressIndicator()) : crearNavegacion(),
+            // if (pregunta.opcionUnica) Spacer(),
           ],
         ),
       ),
     );
   }
 
-  Widget buildNavegacion() {
-    final esUltimaPregunta = actual == preguntas.length - 1;
-    final conRespuesta = respuestas[actual] > 0 || preguntas[actual].respuestas.isEmpty;
-    print("$respuestas");
-
+  Widget crearNavegacion() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
       child: Row(
-        mainAxisAlignment: actual > 0 ? MainAxisAlignment.spaceBetween : MainAxisAlignment.end,
+        mainAxisAlignment: !encuesta.esInicial ? MainAxisAlignment.spaceBetween : MainAxisAlignment.end,
         children: [
-          if (actual > 0)
-            SizedBox(
-              width: 120,
-              child: OutlinedButton(onPressed: retrocederPregunta, child: const Text('Anterior')),
-            ),
+          if (!encuesta.esInicial) crearBoton('Anterior', retrocederPregunta),
           SizedBox(height: 32),
-          if (conRespuesta && !esUltimaPregunta)
-            SizedBox(
-              width: 120,
-              child: OutlinedButton(onPressed: avanzarPregunta, child: Text('Siguiente')),
-            ),
-          if (conRespuesta && esUltimaPregunta)
-            SizedBox(
-              width: 120,
-              child: FilledButton(
-                  onPressed: finalizarEncuesta,
-                  child: Text('Finalizar', style: TextStyle(fontWeight: FontWeight.bold))),
-            ),
+          if (encuesta.actual.esContestada) crearBoton('Siguiente', avanzarPregunta),
         ],
       ),
     );
   }
 
-  Widget buildDescripcion(Pregunta pregunta) {
-    return Expanded(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            pregunta.descripcion,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
+  SizedBox crearBoton(String texto, VoidCallback accion) {
+    return SizedBox(
+        width: 120,
+        child: OutlinedButton(onPressed: accion, child: Text(texto, style: TextStyle(color: Colors.white))));
   }
 
-  Widget creardRespuesta(String respuesta, int i) {
-    final bool seleccionado = (actual < respuestas.length) && (respuestas[actual] == i + 1);
-    final par = respuesta.split("|").first.split(":");
+  Widget crearDescripcion(Pregunta pregunta) => Expanded(
+      child: Center(
+          child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(pregunta.descripcion.replaceAll(".", "\n"),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal, color: Colors.white),
+                  textAlign: TextAlign.center))));
+
+  Widget crearRespuesta(int i) {
+    final pregunta = encuesta.actual;
+    final respuesta = pregunta.respuestas[i];
+    final bool seleccionado = (i + 1) == pregunta.respuesta;
+    final par = respuesta.split(".");
 
     final texto = par[0].trim();
     final info = par.length > 1 ? par[1].trim() : "";
-    print('[$texto] - [$info] $seleccionado');
 
-    final color = (seleccionado ? Colors.red : Colors.green);
+    final color = (seleccionado ? Colors.yellow : Colors.black);
+    final compacta = pregunta.opcionUnica;
+
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: ElevatedButton(
-        onPressed: () => seleccionarRespuesta(i + 1),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            width: Get.width - 20,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(texto, style: TextStyle(fontSize: 20, color: color)),
-                if (info.isNotEmpty) Text(info, style: TextStyle(fontSize: 16, color: color)),
-              ],
-            ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white.withOpacity(0.4), // Ajusta el nivel de transparencia aquí
+          padding: EdgeInsets.all(16),
+        ),
+        onPressed: () => marcarRespuesta(i + 1),
+        child: SizedBox(
+          width: compacta ? 120 : Get.width - 20,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Spacer(),
+              Column(
+                // crossAxisAlignment: compacta ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    texto,
+                    style: TextStyle(fontSize: 20, color: color, fontWeight: FontWeight.bold),
+                    textAlign: compacta ? TextAlign.center : TextAlign.start,
+                  ),
+                  if (info.isNotEmpty)
+                    Text(info, style: TextStyle(fontSize: 16, color: color, fontWeight: FontWeight.w100)),
+                ],
+              ),
+              Spacer(),
+              if (estadisticas && !compacta)
+                Text("${12}", style: TextStyle(fontSize: 16, color: color, fontWeight: FontWeight.w100))
+            ],
           ),
         ),
       ),
