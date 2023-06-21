@@ -129,7 +129,7 @@ class _EncuestaPageState extends State<EncuestaPage> {
     final info = par.length > 1 ? par[1].trim() : "";
 
     final unica = pregunta.opcionUnica;
-    final color = (seleccionado && !unica ? Colors.yellow : Colors.black);
+    final color = (seleccionado && !unica ? Colors.yellow : Colors.white);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
