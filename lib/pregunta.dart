@@ -133,7 +133,7 @@ class Encuesta extends ListBase<Pregunta> {
   factory Encuesta.bienvenida() {
     final salida = Encuesta();
     salida.add(Pregunta(
-        id: "0", descripcion: '*Bienvenido*..La siguiente encuesta es totalmente _anónima_', respuestas: ["Comenzar"]));
+        id: "1", descripcion: 'Bienvenidos.. La presente encuesta es totalmente anónima', respuestas: ["Comenzar"]));
     return salida;
   }
 

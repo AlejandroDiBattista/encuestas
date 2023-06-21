@@ -57914,7 +57914,7 @@ gis(){return"windows"},
 gjT(){return"\\"}}
 A.qC.prototype={
 az(){var s=A.acc()
-s.a.push(new A.cL("0","*Bienvenido*..La siguiente encuesta es totalmente _an\xf3nima_",A.a(["Comenzar"],t.s)))
+s.a.push(new A.cL("1","Bienvenidos.. La presente encuesta es totalmente an\xf3nima",A.a(["Comenzar"],t.s)))
 s.c=0
 return new A.vp(s,B.p)}}
 A.vp.prototype={
