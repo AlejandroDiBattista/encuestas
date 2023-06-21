@@ -30,8 +30,6 @@ dependencies:
     flutter_launcher_icons: ^0.13.1
     # csv: ^5.0.2
 
-flutter_launcher_name:
-    name: 'Encuestas YB'
 
 flutter_launcher_icons:
     android: "launcher_icon"
