@@ -3,8 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'colores.dart';
-
 extension DateTimeUtils on DateTime {
   String get fecha => DateFormat('dd/MM/yyyy').format(this);
   String get hora => DateFormat('HH:mm:ss').format(this);

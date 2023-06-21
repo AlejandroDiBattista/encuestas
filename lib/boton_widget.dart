@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class Boton extends StatelessWidget {
   final IconData icon;
@@ -19,9 +18,6 @@ class Boton extends StatelessWidget {
       this.color,
       this.destacar = false});
 
-  // factory Boton.navegar(IconData icon, String label, dynamic go) =>
-  //     Boton(icon: icon, label: label, onPressed: () => Get.to(go()));
-
   @override
   Widget build(BuildContext context) {
     final aux = this.color ?? Colors.green;
@@ -35,7 +31,7 @@ class Boton extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Icon(icon, size: 28, color: aux),
-                 Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+                Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
                   Text(label, style: TextStyle(fontSize: info.isEmpty ? 18 : 20, color: aux)),
                   if (info.isNotEmpty)
                     Text(info, style: TextStyle(fontSize: 16, color: aux, fontWeight: FontWeight.w200)),

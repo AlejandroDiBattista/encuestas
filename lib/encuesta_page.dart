@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../modelos/pregunta.dart';
-import '../utils.dart';
+import 'pregunta.dart';
+import 'utils.dart';
 
 class EncuestaPage extends StatefulWidget {
   const EncuestaPage({super.key});
@@ -16,12 +16,12 @@ class _EncuestaPageState extends State<EncuestaPage> {
 
   bool cargando = false;
   bool estadisticas = false;
+  bool desarrollador = false;
+  int contarDesarrollador = 0;
 
   @override
   void initState() {
     super.initState();
-
-    // cargando = true;
 
     Encuesta.bajar().then((v) {
       encuesta = v;
@@ -33,7 +33,6 @@ class _EncuestaPageState extends State<EncuestaPage> {
   void actualizar() => setState(() {});
 
   void marcarRespuesta(int respuesta) {
-    // if (encuesta.actual.respuesta == respuesta) respuesta = 0;
     encuesta.responder(respuesta);
     avanzarPregunta();
   }
@@ -48,14 +47,18 @@ class _EncuestaPageState extends State<EncuestaPage> {
     if (encuesta.esFinal && encuesta.actual.esContestada) {
       encuesta.guardar();
       encuesta.reiniciar();
+      estadisticas = false;
     }
     actualizar();
   }
 
-  // void finalizarEncuesta() {
-  //   encuesta.guardar();
-  //   Get.back();
-  // }
+  void mostrarEstadisticas() async {
+    estadisticas = !estadisticas;
+    if (estadisticas) {
+      await encuesta.cargarResultados();
+    }
+    actualizar();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,14 +66,21 @@ class _EncuestaPageState extends State<EncuestaPage> {
     final respuestas = pregunta.respuestas;
 
     return Scaffold(
-      appBar: crearTitulo(Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text('Encuesta PASO 2023'),
-          Text('${pregunta.id}'),
-          Text('${encuesta.posicion + 1} de ${encuesta.length}', style: const TextStyle(fontSize: 15))
-        ],
-      )),
+      appBar: crearTitulo(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Encuesta PASO 2023'),
+              Text('${pregunta.id}'),
+              Text('${encuesta.posicion + 1} de ${encuesta.length}', style: const TextStyle(fontSize: 15))
+            ],
+          ),
+          actions: [
+            if (desarrollador)
+              IconButton(
+                  onPressed: mostrarEstadisticas,
+                  icon: Icon(Icons.bar_chart, color: estadisticas ? Colors.yellow : Colors.grey)),
+          ]),
       extendBodyBehindAppBar: true,
       body: Container(
         decoration: crearFondo(),
@@ -79,11 +89,9 @@ class _EncuestaPageState extends State<EncuestaPage> {
           children: [
             crearDescripcion(pregunta),
             Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: respuestas.asMap().entries.map((item) => crearRespuesta(item.key)).toList(),
-            ),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: respuestas.asMap().entries.map((item) => crearRespuesta(item.key)).toList()),
             cargando ? Center(child: CircularProgressIndicator()) : crearNavegacion(),
-            // if (pregunta.opcionUnica) Spacer(),
           ],
         ),
       ),
@@ -104,19 +112,22 @@ class _EncuestaPageState extends State<EncuestaPage> {
     );
   }
 
-  SizedBox crearBoton(String texto, VoidCallback accion) {
+  Widget crearBoton(String texto, VoidCallback accion) {
     return SizedBox(
         width: 120,
         child: OutlinedButton(onPressed: accion, child: Text(texto, style: TextStyle(color: Colors.white))));
   }
 
   Widget crearDescripcion(Pregunta pregunta) => Expanded(
-      child: Center(
-          child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(pregunta.descripcion.replaceAll(".", "\n"),
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal, color: Colors.white),
-                  textAlign: TextAlign.center))));
+          child: InkWell(
+        onTap: modoDesarrollador,
+        child: Center(
+            child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(pregunta.descripcion.replaceAll(".", "\n"),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal, color: Colors.white),
+                    textAlign: TextAlign.center))),
+      ));
 
   Widget crearRespuesta(int i) {
     final pregunta = encuesta.actual;
@@ -130,7 +141,7 @@ class _EncuestaPageState extends State<EncuestaPage> {
 
     final unica = pregunta.opcionUnica;
     final color = (seleccionado && !unica ? Colors.yellow : Colors.white);
-
+    final cantidad = encuesta.resultados.cantidad('${pregunta.id}.${i + 1}');
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: ElevatedButton(
@@ -157,11 +168,22 @@ class _EncuestaPageState extends State<EncuestaPage> {
               ),
               Spacer(),
               if (estadisticas && !unica)
-                Text("${12}", style: TextStyle(fontSize: 16, color: color, fontWeight: FontWeight.w100))
+                Text("$cantidad", style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w100))
             ],
           ),
         ),
       ),
     );
+  }
+
+  void modoDesarrollador() {
+    if (desarrollador) {
+      contarDesarrollador--;
+      desarrollador = contarDesarrollador > 0;
+    } else {
+      contarDesarrollador++;
+      desarrollador = contarDesarrollador >= 7;
+    }
+    actualizar();
   }
 }

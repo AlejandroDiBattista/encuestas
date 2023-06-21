@@ -1,4 +1,5 @@
 import 'package:gsheets/gsheets.dart';
+import 'package:punteo_yb/utils.dart';
 
 class SheetsApi {
   static const _credencial = {
@@ -43,12 +44,16 @@ class SheetsApi {
 
   static Future<void> registrarRespuestas(List<int> datos) async {
     await _init();
-    await _enviar(respuestas!, datos);
+    await _enviar(respuestas!, datos, hora: true);
   }
 
-  static Future<void> _enviar(Worksheet destino, List<int> datos) async {
+  static Future<void> _enviar(Worksheet destino, List<int> datos, {bool hora = false}) async {
     await _init();
-    destino.values.appendRow(datos);
+    List<dynamic> fila = [];
+    datos.forEach((dato) => fila.add(dato));
+    fila.add(DateTime.now().fechaHora);
+    print('$fila');
+    destino.values.appendRow(fila);
   }
 
   static Future<List<Map<String, dynamic>>> _traer(Worksheet origen) async {

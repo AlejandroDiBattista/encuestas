@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import 'colores.dart';
-import 'pages/encuesta_page.dart';
+import 'encuesta_page.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
@@ -20,11 +19,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
         title: 'Encuesta',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          appBarTheme: AppBarTheme(color: Colores.comenzar),
-          colorSchemeSeed: Colors.green,
-          useMaterial3: true,
-        ),
+        theme: ThemeData(useMaterial3: true),
         home: const EncuestaPage());
   }
 }

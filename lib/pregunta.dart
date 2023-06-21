@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
-import '../sheets_api.dart';
+import 'sheets_api.dart';
 
 typedef Preguntas = List<Pregunta>;
 
@@ -69,6 +69,7 @@ class Pregunta {
 
 class Encuesta extends ListBase<Pregunta> {
   List<Pregunta> preguntas = [];
+  final resultados = Resultados();
   int posicion = -1;
   List<int> anteriores = [];
 
@@ -109,7 +110,7 @@ class Encuesta extends ListBase<Pregunta> {
 
   void anterior() {
     if (esInicial) return;
-    
+
     posicion = anteriores.removeLast();
   }
 
@@ -126,13 +127,13 @@ class Encuesta extends ListBase<Pregunta> {
   }
 
   void guardar() async {
-    await SheetsApi.registrarRespuestas(this.map((pregunta) => pregunta.respuesta).toList());
+    await SheetsApi.registrarRespuestas(map((pregunta) => pregunta.respuesta).toList());
   }
 
   factory Encuesta.bienvenida() {
     final salida = Encuesta();
     salida.add(Pregunta(
-        id: "0", descripcion: 'Bienvenido..La siguiente encuesta es totalmente anónima', respuestas: ["Comenzar"]));
+        id: "0", descripcion: '*Bienvenido*..La siguiente encuesta es totalmente _anónima_', respuestas: ["Comenzar"]));
     return salida;
   }
 
@@ -146,5 +147,39 @@ class Encuesta extends ListBase<Pregunta> {
     preguntas.forEach((pregunta) => pregunta.respuesta = 0);
     anteriores.clear();
     posicion = 0;
+  }
+
+  Future<void> cargarResultados() async {
+    final ids = this.map((p) => p.id);
+    final contador = this.resultados;
+
+    final datos = await SheetsApi.traerRespuestas();
+
+    contador.iniciar();
+    datos.forEach((linea) {
+      ids.forEach((id) {
+        final n = linea[id] ?? 0;
+        contador.contar('$id.$n');
+      });
+    });
+    contador.mostrar();
+  }
+}
+
+class Resultados {
+  Map<String, int> contador = {};
+
+  Resultados();
+
+  void iniciar() => contador.clear();
+  void contar(String id, [int cantidad = 1]) => contador[id] = this.cantidad(id) + 1;
+
+  int cantidad(String id) => (contador.containsKey(id) ? contador[id] as int : 0);
+
+  void mostrar() {
+    print("Mostrar resultados ${contador.length}");
+    contador.entries.forEach((item) {
+      print('${item.key} = ${item.value}');
+    });
   }
 }
