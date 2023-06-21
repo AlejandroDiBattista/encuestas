@@ -1,13 +1,13 @@
 {
-    "name": "Punteo YB",
-    "short_name": "PunteoYB",
-    "start_url": "https://punteo.netlify.app/",
+    "name": "Encuestas YB",
+    "short_name": "Encuestas",
+    "start_url": "https://encuestasyb.netlify.app/",
     "scope": "/",
     "display": "fullscreen",
     "orientation": "portrait",
     "background_color": "#hexcode",
     "theme_color": "#hexcode",
-    "description": "El mejor punteo de la web",
+    "description": "Encuestas rápidas",
     "prefer_related_applications": false,
     "icons": [
         {

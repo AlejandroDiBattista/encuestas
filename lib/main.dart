@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-        title: 'Encuesta',
+        title: 'Encuestas',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(useMaterial3: true),
         home: const EncuestaPage());

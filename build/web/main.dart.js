@@ -58015,7 +58015,7 @@ s.DR()
 return null},
 $S:0}
 A.BN.prototype={
-P(a){return new A.qY(B.y2,"Encuesta",A.aed(null,!0),!1,null)}}
+P(a){return new A.qY(B.y2,"Encuestas",A.aed(null,!0),!1,null)}}
 A.cL.prototype={
 ba(){return B.Z.hp(A.av(["id",this.a,"descripcion",this.b,"respuestas",this.c],t.N,t.z))},
 j(a){return"Pregunta(id: "+this.a+", descripcion: "+this.b+", respuestas: "+A.h(this.c)+")"},
