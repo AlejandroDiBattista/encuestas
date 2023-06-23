@@ -20,6 +20,6 @@ IF %ERRORLEVEL% NEQ 0 (
 echo Publicando sitio...
 git add .
 
-git commit -m "Publicando nueva versión"
+git commit -m "Publicando nueva version"
 
 git push
