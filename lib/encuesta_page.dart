@@ -70,7 +70,7 @@ class _EncuestaPageState extends State<EncuestaPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Encuesta 1 vpubuelta 2023'),
+              const Text('Encuesta 1° vuelta 2023'),
               Text('${pregunta.id}'),
               Text('${encuesta.posicion + 1} de ${encuesta.length}', style: const TextStyle(fontSize: 15))
             ],
